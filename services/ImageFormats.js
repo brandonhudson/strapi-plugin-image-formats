@@ -49,7 +49,17 @@ module.exports = {
 
     if (cachedImage) {
       const url = uploadProvider.getPath(cachedImage);
-      const buffer = fs.readFileSync(url);
+      
+      let buffer = null;
+
+      # If the url is an HTTP url, get the image from the external source
+      if (url.indexOf('http://') >= 0 || url.indexOf('https://') >= 0) {
+        const image = await Jimp.read(url);
+        buffer = await image.getBufferAsync(Jimp.AUTO);
+      } else {
+        buffer = fs.readFileSync(url);
+      }
+
       return { mime: cachedImage.mime, buffer };
     }
 
